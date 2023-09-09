@@ -1,111 +1,120 @@
-/*Exercício 3: Manipulação de strings tipo C
-● Implemente uma aplicação em C que:
-a. Leia do teclado uma string no formato dd/mm/aaaa, ao alguma variação desse formato (Ex. 5/12/2022, 05/02/23, 07/5/2024), e imprima na tela por separado dia, mês e ano.
-b. Modifique o exemplo anterior de forma a verificar se a data fornecida é uma data válida (Ex. 31/02/1990 e 24/15/2002 não são datas válidas);
-c. Modifique a aplicação de forma que, se for uma data válida, imprima a data por extenso (Ex. para 5/12/2022 imprimir 5 de dezembro de 2022)*/
-
 #include <iostream>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <sstream>
+#include <string>
+#include<cctype>
 
 using namespace std;
 
-int main(void)
-{
-    char data[11];
-    int dia, mes, ano;
+int posicaoDaPrimeiraBarra(string );
+int posicaoDaSegundaBarra(string );
+string armazenaData();
+void separaData(int & , int &, int&, string);
+bool verificaData(int , int , int );
+bool anoBissexto(int);
+void armazenaVerificaSepara(string &,int &,int & ,int &);
+int separaDia(int, string);
+int separaMes(int , int , string);
+int separaAno(int , string);
+string nomeDoMes(int);
+void imprimeData(int , int , int );
 
-    cout << "\nDigite uma data no formato dd/mm/aaaa: ";
-    cin >> data;
+int main(){
 
-    dia = atoi(strtok(data, "/"));
-    mes = atoi(strtok(NULL, "/"));
-    ano = atoi(strtok(NULL, "/"));
+    string data;
+    int dia,mes,ano;
 
-    if (dia > 31 || dia < 1 || mes > 12 || mes < 1 || ano < 1)
-    {
-        cout << "\nData invalida!" << endl;
-        return 0;
+    armazenaVerificaSepara(data,dia,mes,ano);
+
+    imprimeData(dia,mes,ano);
+
+
+    return 0;
+}
+
+void imprimeData(int dia, int mes, int ano){
+    cout << dia << " de " << nomeDoMes(mes) << " de " << ano << endl;
+}
+
+string nomeDoMes(int mes){
+    string nomes[] = {"Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"};
+    return nomes[mes-1];
+}
+
+void armazenaVerificaSepara(string &data,int &dia ,int &mes ,int &ano){
+    do{
+    data = armazenaData();
+    separaData(dia,mes,ano,data);
+    if(!verificaData(dia,mes,ano)){
+        system("clear");
+        cout << "Data invalida" << endl;
+    }else{
+        break;
+    }
+    }while(1);
+
+}
+
+bool anoBissexto(int ano){
+    return (ano % 4 == 0 && (ano % 100 != 0 || ano % 400 == 0)) ? true : false;
+}
+
+bool verificaData(int dia , int mes, int ano){
+
+    int diasNoMes[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    if(ano < 0 ){
+        return false;
     }
 
-    if (mes == 2)
-    {
-        if (dia > 29)
-        {
-            cout << "\nData invalida!" << endl;
-            return 0;
+    if (mes < 1 || mes > 12) {
+        return false;
+    }
+
+    if (mes == 2 && anoBissexto(ano)) {
+        if (dia < 1 || dia > 29) {
+            return false;
         }
-        else if (dia == 29)
-        {
-            if (ano % 4 != 0)
-            {
-                cout << "\nData invalida!" << endl;
-                return 0;
-            }
-            else if (ano % 100 == 0 && ano % 400 != 0)
-            {
-                cout << "\nData invalida!" << endl;
-                return 0;
-            }
+    } else {
+        if (dia < 1 || dia > diasNoMes[mes]) {
+            return false;
         }
     }
 
-    if (mes == 4 || mes == 6 || mes == 9 || mes == 11)
-    {
-        if (dia > 30)
-        {
-            cout << "\nData invalida!" << endl;
-            return 0;
-        }
-    }
+    return true;
 
-    if (mes == 1)
-    {
-        cout << "\nData valida: " << dia << " de janeiro de " << ano << endl;
-    }
-    else if (mes == 2)
-    {
-        cout << "\nData valida: " << dia << " de fevereiro de " << ano << endl;
-    }
-    else if (mes == 3)
-    {
-        cout << "\nData valida: " << dia << " de março de " << ano << endl;
-    }
-    else if (mes == 4)
-    {
-        cout << "\nData valida: " << dia << " de abril de " << ano << endl;
-    }
-    else if (mes == 5)
-    {
-        cout << "\nData valida: " << dia << " de maio de " << ano << endl;
-    }
-    else if (mes == 6)
-    {
-        cout << "\nData valida: " << dia << " de junho de " << ano << endl;
-    }
-    else if (mes == 7)
-    {
-        cout << "\nData valida: " << dia << " de julho de " << ano << endl;
-    }
-    else if (mes == 8)
-    {
-        cout << "\nData valida: " << dia << " de agosto de " << ano << endl;
-    }
-    else if (mes == 9)
-    {
-        cout << "\nData valida: " << dia << " de setembro de " << ano << endl;
-    }
-    else if (mes == 10)
-    {
-        cout << "\nData valida: " << dia << " de outubro de " << ano << endl;
-    }
-    else if (mes == 11)
-    {
-        cout << "\nData valida: " << dia << " de novembro de " << ano << endl;
-    }
-    else if (mes == 12)
-    {
-        cout << "\nData valida: " << dia << " de dezembro de " << ano << endl;
-    }
+}
+
+void separaData(int &dia, int &mes, int &ano, string data){
+    int pos1 = posicaoDaPrimeiraBarra(data);
+    int pos2 = posicaoDaSegundaBarra(data);
+    dia = separaDia(pos1,data);
+    mes = separaMes(pos1,pos2,data);
+    ano = separaAno(pos2,data);
+}
+
+int separaDia(int pos1, string data){
+    return stoi(data.substr(0,pos1));
+}
+
+int separaMes(int pos1, int pos2 , string data){
+    return stoi(data.substr(pos1+1,pos2));
+}
+
+int separaAno(int pos2, string data){
+    return stoi(data.substr(pos2+1));
+}
+
+string armazenaData(){
+    string data;
+    cout << "Entre com uma data no formato 'xx/xx/xxxx' : ";
+    getline(cin,data);
+    return data;
+}
+
+int posicaoDaPrimeiraBarra(string data){
+    return  data.find('/');
+}
+
+int posicaoDaSegundaBarra(string data){
+    return data.find_last_of('/');
 }
