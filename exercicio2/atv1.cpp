@@ -1,4 +1,5 @@
 #include<iostream>
+#include<time.h>
 
 using namespace std;
 
@@ -12,6 +13,8 @@ void imprimeMaisAparicoes(int *, int &);
 
 
 int main(){
+
+    srand(time(0));
 
     int vetor[100];
     int aparicoes[20]={};
